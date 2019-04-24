@@ -44,21 +44,6 @@ router.get('/:id/posts', (req, res) => {
 		});
 });
 
-router.post('/', (req, res) => {
-	const newUser = req.body;
-	if (!newUser.hasOwnProperty('name')) {
-		res.status(400).json({ errorMessage: 'Please provide name for the user.' });
-	}
-	dbUsers
-		.insert(newUser)
-		.then((idOfNewUser) => {
-			res.status(201).json(idOfNewUser);
-		})
-		.catch((err) => {
-			res.status(500).json({ error: 'There was an error while saving new user to the database' });
-		});
-});
-
 router.delete('/:id', (req, res) => {
 	dbUsers
 		.remove(req.params.id)
@@ -74,7 +59,35 @@ router.delete('/:id', (req, res) => {
 		});
 });
 
-router.put('/:id', (req, res) => {
+// Write custom middleware to ensure that the user's name is upper-cased before
+// the request reaches the POST or PUT route handlers.
+
+function checkUpperCasedUserName(req, res, next) {
+	const userName = req.body;
+	console.log(userName.name);
+	if (userName.name === userName.name.toUpperCase()) {
+		next();
+	} else {
+		res.status(400).json({ errorMessage: 'Please provide name for the user uppercased.' });
+	}
+}
+
+router.post('/', checkUpperCasedUserName, (req, res) => {
+	const newUser = req.body;
+	if (!newUser.hasOwnProperty('name')) {
+		res.status(400).json({ errorMessage: 'Please provide name for the user.' });
+	}
+	dbUsers
+		.insert(newUser)
+		.then((idOfNewUser) => {
+			res.status(201).json(idOfNewUser);
+		})
+		.catch((err) => {
+			res.status(500).json({ error: 'There was an error while saving new user to the database' });
+		});
+});
+
+router.put('/:id', checkUpperCasedUserName, (req, res) => {
 	const userToUpdate = req.body;
 	if (!userToUpdate.hasOwnProperty('name')) {
 		res.status(400).json({ errorMessage: 'Please provide name for the user.' });
