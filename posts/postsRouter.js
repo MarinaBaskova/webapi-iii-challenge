@@ -5,6 +5,9 @@ const router = express.Router();
 
 // /api/posts
 router.get('/', (req, res) => {
+	const ip = req.ip;
+	console.log('IP', ip);
+
 	dbPosts
 		.get()
 		.then((posts) => {
@@ -32,8 +35,9 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
 	const newPost = req.body;
-	if (!newPost.hasOwnProperty('title') || !newPost.hasOwnProperty('contents')) {
-		res.status(400).json({ errorMessage: 'Please provide title and contents for the post.' });
+	console.log(newPost);
+	if (!newPost.hasOwnProperty('text') || !newPost.hasOwnProperty('user_id')) {
+		res.status(400).json({ errorMessage: 'Please provide text and user_id for the post.' });
 	}
 	dbPosts
 		.insert(newPost)
@@ -62,8 +66,8 @@ router.delete('/:id', (req, res) => {
 
 router.put('/:id', (req, res) => {
 	const postToUpdate = req.body;
-	if (!postToUpdate.hasOwnProperty('title') || !postToUpdate.hasOwnProperty('contents')) {
-		res.status(400).json({ errorMessage: 'Please provide title and contents for the post.' });
+	if (!postToUpdate.hasOwnProperty('text') || !postToUpdate.hasOwnProperty('id')) {
+		res.status(400).json({ errorMessage: 'Please provide text and user_id for the post.' });
 	}
 	dbPosts
 		.update(req.params.id, postToUpdate)
